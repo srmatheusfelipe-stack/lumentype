@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Competição — LumenType</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js" defer></script>
+  <script src="js/content.js" defer></script>
+  <script src="js/keyboard.js" defer></script>
+  <script src="js/engine.js" defer></script>
+
+  <style>
+    body { align-items: flex-start; height: auto; min-height: 100vh; overflow-y: auto; }
+    .wrap { width: 100%; max-width: 1000px; margin: 0 auto; padding: 18px; }
+
+    /* ---- espera ---- */
+    #espera { display: flex; flex-direction: column; align-items: center; }
+    #espera h2 { color: #fff; font-size: 1.5rem; margin-bottom: 6px; text-shadow: 2px 2px 0 rgba(0,0,0,.15); }
+    #esperaMsg { color: rgba(255,255,255,.95); font-weight: 900; margin-bottom: 22px; }
+    #gridEspera { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+
+    /* ---- contagem ---- */
+    #contagem {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      flex-direction: column; justify-content: center; align-items: center;
+    }
+    #numContagem { font-size: 13rem; color: #fff; text-shadow: 8px 8px 0 #007bb5; line-height: 1; }
+    #contagem p { color: #ffeb3b; font-size: 2rem; font-weight: 900; text-transform: uppercase; }
+
+    /* ---- jogo ---- */
+    #jogo { display: none; flex-direction: column; gap: 14px; }
+    .barraTopo {
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(255,255,255,.15); border-radius: 16px; padding: 10px 16px;
+    }
+    #faixaAtual { color: #fff; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-size: .95rem; }
+    #timer { font-size: 1.4rem; }
+
+    .card2 { background: #fff; border-radius: 22px; padding: 24px; box-shadow: 0 15px 35px rgba(0,0,0,.18); }
+
+    #quadro {
+      font-size: 1.7rem; line-height: 1.7; color: #c7d0d9; text-align: left;
+      letter-spacing: .5px; user-select: none; word-break: break-word;
+      border-radius: 10px; transition: box-shadow .15s;
+    }
+    #quadro.temErro { box-shadow: 0 0 0 3px #e74c3c; }
+    #quadro .pal { display: inline-block; }
+    #quadro .ok { color: #2f3e4e; font-weight: 900; }
+    #quadro .x { color: #e74c3c; background: #fadbd8; border-radius: 4px; font-weight: 900; }
+    #quadro .atual {
+      background: #3498db; color: #fff; border-radius: 4px; padding: 0 2px;
+      animation: cursor 1s infinite;
+    }
+    @keyframes cursor { 50% { opacity: .55; } }
+
+    #dica {
+      display: none; margin-top: 14px; background: #eaf7ff; color: #007bb5;
+      font-weight: 800; padding: 10px 14px; border-radius: 12px; text-align: left;
+    }
+
+    /* ---- MCQ ---- */
+    #mcq { display: none; text-align: left; }
+    #mcq .pergunta { font-size: 1.35rem; font-weight: 900; color: #333; margin-bottom: 16px; }
+    #mcq .ops { display: grid; gap: 10px; }
+    #mcq .op {
+      width: 100%; text-align: left; text-transform: none;
+      background: #f4f8fb; color: #333; border: 3px solid #e2edf3;
+      box-shadow: 0 4px 0 #d4e2ea; font-size: 1.1rem; padding: 14px 16px; border-radius: 14px;
+    }
+    #mcq .op b { color: #4facfe; margin-right: 8px; }
+    #mcq .op.certo { background: #e6f9ec; border-color: #4cd137; box-shadow: 0 4px 0 #38a52a; }
+    #mcq .op.errado { background: #fdecea; border-color: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
+    #mcq .mcqDica { color: #aab6c0; font-weight: 800; font-size: .85rem; margin-top: 12px; text-align: center; }
+
+    /* ---- painel de stats ---- */
+    .painel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .painel .p { background: #fff; border-radius: 16px; padding: 12px 6px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,.1); }
+    .painel .p b { display: block; font-size: 1.5rem; color: #007bb5; line-height: 1; }
+    .painel .p span { font-size: .7rem; font-weight: 900; color: #9aa7b2; letter-spacing: .5px; }
+    #vCombo.quente { color: #e84118; }
+    #vCombo.quente + span { color: #e84118; }
+
+    #teclado { margin-top: 4px; }
+
+    #captura { position: fixed; left: -9999px; top: 0; opacity: 0; }
+
+    .floatPts {
+      position: absolute; right: 30px; top: 60px;
+      font-size: 1.6rem; font-weight: 900; color: #9aa7b2;
+      animation: sobe .9s ease-out forwards; pointer-events: none;
+    }
+    .floatPts.bom { color: #4cd137; }
+    @keyframes sobe { to { transform: translateY(-40px); opacity: 0; } }
+
+    /* ---- tela final ---- */
+    .telaFinal {
+      display: none; flex-direction: column; align-items: center; text-align: center;
+      background: #fff; border-radius: 26px; padding: 36px 26px; box-shadow: 0 20px 50px rgba(0,0,0,.25);
+    }
+    .telaFinal .fEmoji { font-size: 4.5rem; filter: drop-shadow(0 8px 8px rgba(0,0,0,.12)); }
+    .telaFinal .fTit { font-size: 2rem; font-weight: 900; margin: 8px 0; text-transform: uppercase; }
+    .telaFinal .fSub { color: #777; font-weight: 700; margin-bottom: 18px; max-width: 420px; }
+    .telaFinal .fPos { font-size: 1.1rem; color: #555; font-weight: 900; margin-bottom: 14px; }
+    .telaFinal .fPos b { font-size: 2.4rem; color: #333; }
+    .telaFinal .fPremio {
+      background: #fff7e0; color: #b8860b; border: 3px dashed #fbc531;
+      font-weight: 900; padding: 10px 18px; border-radius: 14px; margin-bottom: 18px;
+    }
+    .telaFinal .fStats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 460px; }
+    .telaFinal .st { background: #f7fcff; border: 2px solid #eef7fc; border-radius: 14px; padding: 12px 4px; }
+    .telaFinal .st b { display: block; font-size: 1.4rem; color: #333; line-height: 1; }
+    .telaFinal .st span { font-size: .65rem; font-weight: 900; color: #9aa7b2; }
+    .telaFinal .fTV { margin-top: 20px; color: #999; font-weight: 900; }
+    .telaFinal .fBtns { display: flex; gap: 10px; margin-top: 20px; }
+    .telaFinal .fBtns button { background: #4cd137; color: #fff; box-shadow: 0 5px 0 #359b25; padding: 14px 22px; }
+    .telaFinal .fBtns .sec { background: #ccc; box-shadow: 0 5px 0 #999; }
+    .telaFinal .fCarregando { color: #777; font-weight: 900; font-size: 1.2rem; }
+
+    .telaFinal.ouro   .fTit { color: #d4a017; }
+    .telaFinal.prata  .fTit { color: #8d99a6; }
+    .telaFinal.bronze .fTit { color: #b06a2c; }
+    .telaFinal.azul   .fTit { color: #4facfe; }
+    .telaFinal.verde  .fTit { color: #4cd137; }
+
+    @media (max-width: 640px) {
+      #quadro { font-size: 1.3rem; }
+      .painel .p b { font-size: 1.2rem; }
+      #numContagem { font-size: 8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- ESPERA -->
+    <div id="espera">
+      <h2>👀 Você está na sala!</h2>
+      <p id="esperaMsg">carregando...</p>
+      <div id="gridEspera"></div>
+    </div>
+
+    <!-- CONTAGEM -->
+    <div id="contagem">
+      <h1 id="numContagem">5</h1>
+      <p>Preparem-se!</p>
+    </div>
+
+    <!-- JOGO -->
+    <div id="jogo">
+      <div class="barraTopo">
+        <span id="faixaAtual">AQUECIMENTO</span>
+        <span id="timer" class="timerPill">0:00</span>
+      </div>
+
+      <div class="card2" style="position: relative;">
+        <div id="quadro"></div>
+        <div id="dica"></div>
+        <div id="mcq"></div>
+      </div>
+
+      <div class="painel">
+        <div class="p"><b id="vScore">0</b><span>PONTOS</span></div>
+        <div class="p"><b id="vPPM">0</b><span>PPM</span></div>
+        <div class="p"><b id="vPrec">100%</b><span>PRECISÃO</span></div>
+        <div class="p"><b id="vCombo">x1</b><span>COMBO</span></div>
+      </div>
+
+      <div id="teclado"></div>
+    </div>
+
+    <!-- FINAL -->
+    <div id="telaFinal" class="telaFinal"></div>
+
+    <textarea id="captura" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+  </div>
+</body>
+</html>

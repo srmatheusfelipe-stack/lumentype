@@ -1,0 +1,194 @@
+/* css/global.css */
+
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+  font-family: 'Nunito', sans-serif; /* Fonte do Perguntados */
+}
+
+body {
+  /* Fundo azul vibrante e alegre */
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #333;
+}
+
+.lumen-container {
+  text-align: center;
+  width: 100%;
+  max-width: 450px;
+  padding: 20px;
+}
+
+/* Animação para a lâmpada ficar flutuando */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.logo-lumen { margin-bottom: 5px; animation: bounce 2.5s infinite; }
+.logo-lumen .icon { font-size: 4rem; display: block; margin-bottom: -15px; }
+
+/* Texto da logo com sombra forte estilo Cartoon */
+.logo-lumen h1 { 
+  font-size: 3.8rem; 
+  font-weight: 900; 
+  color: white; 
+  text-shadow: 4px 4px 0 #007bb5; 
+  letter-spacing: -2px; 
+}
+.logo-lumen .highlight { color: #ffeb3b; /* Amarelo Lumen */ }
+
+.subtitle { 
+  color: rgba(255, 255, 255, 0.95); 
+  font-weight: 900; 
+  margin-bottom: 25px; 
+  font-size: 1rem; 
+  text-transform: uppercase; 
+  letter-spacing: 2px; 
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+}
+
+.card {
+  background: white;
+  padding: 35px;
+  border-radius: 30px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+input {
+  width: 100%; 
+  padding: 18px; 
+  margin-bottom: 20px;
+  border: 4px solid #f0f0f0; 
+  border-radius: 20px;
+  font-size: 1.5rem; 
+  font-weight: 900;
+  text-align: center; 
+  text-transform: uppercase; 
+  color: #555;
+  outline: none; 
+  transition: 0.3s;
+}
+input:focus { border-color: #4facfe; background-color: #f7fcff; }
+
+/* Botões Gamificados (Efeito 3D) */
+button {
+  width: 100%; 
+  padding: 18px; 
+  border: none; 
+  border-radius: 20px;
+  font-size: 1.3rem; 
+  font-weight: 900; 
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  text-transform: uppercase;
+}
+
+/* Quando clica, o botão "afunda" */
+button:active { transform: translateY(6px); box-shadow: 0 0px 0 !important; }
+
+.btn-play {
+  background: #4cd137; 
+  color: white;
+  box-shadow: 0 6px 0 #359b25;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+}
+.btn-play:hover { background: #44bd32; }
+
+.divider {
+  margin: 25px 0; 
+  color: #ccc; 
+  font-weight: 900;
+  display: flex; 
+  align-items: center;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+.divider::before, .divider::after {
+  content: ""; 
+  flex: 1; 
+  border-bottom: 3px solid #f0f0f0; 
+  margin: 0 15px;
+}
+
+.btn-create {
+  background: #fbc531;
+  color: white;
+  text-shadow: 1px 1px 0 #c29821;
+  box-shadow: 0 6px 0 #c29821;
+}
+.btn-create:hover { background: #e1b12c; }
+
+/* ---- selects gamificados ---- */
+select {
+  width: 100%;
+  padding: 16px;
+  border: 4px solid #f0f0f0;
+  border-radius: 18px;
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-align: center;
+  color: #555;
+  background: #fff;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+select:focus { border-color: #4facfe; background: #f7fcff; }
+
+/* ---- card de avatar (lobby / espera / TV) ---- */
+.cardAvatar {
+  background: #f7fcff;
+  border: 3px solid #4facfe;
+  border-radius: 16px;
+  padding: 12px;
+  width: 120px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+}
+.cardAvatar img {
+  width: 66px; height: 66px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #4cd137;
+  margin-bottom: 8px;
+}
+.cardAvatar span {
+  display: block;
+  font-size: .95rem;
+  font-weight: 900;
+  color: #333;
+  text-transform: uppercase;
+  word-break: break-word;
+}
+
+/* ---- confete ---- */
+.confete {
+  position: fixed; top: -20px;
+  width: 10px; height: 16px;
+  z-index: 99999;
+  opacity: .9;
+  animation: cair linear forwards;
+}
+@keyframes cair {
+  to { transform: translateY(105vh) rotate(720deg); opacity: .2; }
+}
+
+/* ---- pill do cronometro ---- */
+.timerPill {
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  background: #fff;
+  color: #007bb5;
+  border-radius: 999px;
+  padding: 6px 16px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.08);
+}
+.timerPill.urgente { background: #e84118; color: #fff; animation: bat .6s infinite; }
+@keyframes bat { 50% { transform: scale(1.08); } }

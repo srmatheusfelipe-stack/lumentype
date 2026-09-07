@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telão — LumenType</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js" defer></script>
+  <script src="js/tv.js" defer></script>
+
+  <style>
+    body { align-items: flex-start; height: auto; min-height: 100vh; overflow-y: auto; }
+    .wrap { width: 100%; max-width: 1100px; margin: 0 auto; padding: 22px; }
+
+    .topo { display: flex; justify-content: space-between; align-items: center; color: #fff; margin-bottom: 16px; }
+    .topo .sala { font-size: 2.4rem; font-weight: 900; text-shadow: 3px 3px 0 #007bb5; }
+    .topo .sala small { display: block; font-size: .9rem; letter-spacing: 2px; opacity: .9; }
+    .topo .info { text-align: right; font-weight: 900; }
+    #timer { font-size: 2rem; }
+
+    .painelBranco { background: #fff; border-radius: 24px; padding: 22px; box-shadow: 0 18px 45px rgba(0,0,0,.2); min-height: 320px; }
+
+    /* lobby */
+    #lobby { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+    #lobby .vazio { color: #9aa7b2; font-weight: 900; font-size: 1.2rem; width: 100%; text-align: center; padding: 40px 0; }
+    #btnIniciar { margin-top: 18px; background: #ccc; box-shadow: 0 6px 0 #999; cursor: not-allowed; }
+    #btnIniciar.pronto { background: #4cd137; box-shadow: 0 6px 0 #359b25; cursor: pointer; }
+
+    /* contagem */
+    #contagem {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: linear-gradient(135deg, #fbc531, #e1b12c);
+      flex-direction: column; justify-content: center; align-items: center;
+    }
+    #numContagem { font-size: 17rem; color: #fff; text-shadow: 10px 10px 0 #c29821; line-height: 1; }
+    #contagem p { color: #333; font-size: 2.6rem; font-weight: 900; text-transform: uppercase; }
+
+    /* ranking ao vivo */
+    #ranking { position: relative; }
+    .row {
+      display: flex; align-items: center; gap: 14px;
+      background: #fff; border: 3px solid #eef2f5; border-radius: 16px;
+      padding: 10px 14px; margin-bottom: 10px; will-change: transform;
+    }
+    .row.entra { animation: fadeIn .4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } }
+    .row.lider { border-color: #fbc531; background: #fffdf3; }
+    .row .pos { font-size: 1.7rem; font-weight: 900; width: 54px; text-align: center; color: #64748b; }
+    .row .pos.p1 { color: #d4a017; } .row .pos.p2 { color: #8d99a6; } .row .pos.p3 { color: #b06a2c; }
+    .row .av { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #dbe4ea; }
+    .row .meio { flex: 1; min-width: 0; }
+    .row .nome { font-weight: 900; font-size: 1.25rem; color: #2f3e4e; text-transform: uppercase; }
+    .row .barra { height: 12px; background: #edf1f4; border-radius: 8px; overflow: hidden; margin-top: 5px; }
+    .row .barra > i { display: block; height: 100%; background: #4cd137; border-radius: 8px; transition: width .4s ease; }
+    .row.lider .barra > i { background: #fbc531; }
+    .row .dir { text-align: right; width: 180px; }
+    .row .dir .sc { font-size: 1.4rem; font-weight: 900; color: #007bb5; }
+    .row .dir .ppm { font-size: .85rem; font-weight: 900; color: #9aa7b2; }
+    .row .delta { width: 26px; text-align: center; font-size: 1.1rem; font-weight: 900; }
+    .row .delta.sobe { color: #4cd137; } .row .delta.desce { color: #e74c3c; }
+
+    /* pódio final */
+    #telaFim { display: none; }
+    .fimTit { color: #fff; text-align: center; font-size: 2.6rem; text-shadow: 3px 3px 0 #007bb5; margin-bottom: 20px; }
+    .podio { display: flex; justify-content: center; align-items: flex-end; gap: 16px; margin-bottom: 24px; }
+    .pdBloco {
+      background: #fff; border-radius: 20px; padding: 18px 14px; text-align: center;
+      width: 220px; box-shadow: 0 16px 40px rgba(0,0,0,.22);
+    }
+    .pdBloco.vazio { visibility: hidden; }
+    .pdBloco.p1 { transform: translateY(-24px); border: 4px solid #fbc531; }
+    .pdBloco.p2 { border: 4px solid #bcc6cf; }
+    .pdBloco.p3 { border: 4px solid #d3956a; }
+    .pdBloco .pdMed { font-size: 2.6rem; }
+    .pdBloco img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid #eef2f5; }
+    .pdBloco .pdNome { font-weight: 900; text-transform: uppercase; color: #2f3e4e; margin-top: 6px; font-size: 1.15rem; }
+    .pdBloco .pdPts { font-weight: 900; color: #007bb5; font-size: 1.3rem; }
+    .pdBloco .pdSub { font-size: .8rem; font-weight: 900; color: #9aa7b2; }
+
+    .tabela { background: #fff; border-radius: 18px; padding: 10px 16px; max-width: 640px; margin: 0 auto 22px; box-shadow: 0 12px 30px rgba(0,0,0,.15); }
+    .tabela .lin { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #eef2f5; }
+    .tabela .lin:last-child { border-bottom: none; }
+    .tabela .lin b { width: 40px; color: #64748b; }
+    .tabela .lin img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+    .tabela .lin span { flex: 1; font-weight: 900; text-transform: uppercase; color: #2f3e4e; }
+    .tabela .lin em { font-style: normal; font-weight: 900; color: #007bb5; }
+
+    .premios { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 24px; }
+    .premios .pr { background: #fff7e0; border: 3px dashed #fbc531; border-radius: 16px; padding: 12px 18px; text-align: center; min-width: 170px; }
+    .premios .prT { font-weight: 900; color: #b8860b; }
+    .premios .prN { font-weight: 900; text-transform: uppercase; color: #2f3e4e; font-size: 1.1rem; }
+    .premios .prV { font-weight: 900; color: #9aa7b2; font-size: .85rem; }
+
+    .fimBtns { display: flex; gap: 14px; justify-content: center; }
+    .fimBtns button { width: auto; padding: 16px 28px; background: #4cd137; color: #fff; box-shadow: 0 6px 0 #359b25; }
+    .fimBtns .sec { background: #e74c3c; box-shadow: 0 6px 0 #c0392b; }
+
+    @media (max-width: 820px) {
+      .podio { flex-direction: column; align-items: center; }
+      .pdBloco.p1 { transform: none; }
+      .row .dir { width: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="topo">
+      <div class="sala">SALA <span id="codigo" class="highlight">...</span><small>PAINEL DO PROFESSOR</small></div>
+      <div class="info">
+        ALUNOS: <span id="contador">0</span><br>
+        <span style="opacity:.85">Duração: <span id="duracaoLabel">–</span></span><br>
+        <span id="timer" class="timerPill" style="display:none;">0:00</span>
+      </div>
+    </div>
+
+    <!-- LOBBY -->
+    <div id="telaLobby">
+      <div class="painelBranco"><div id="lobby"></div></div>
+      <button id="btnIniciar" onclick="iniciarCompeticao()" disabled>AGUARDANDO ALUNOS...</button>
+      <button class="btn-create" style="margin-top:12px; background:transparent; box-shadow:none; border:2px solid #fff;"
+        onclick="if(confirm('Sair sem começar?')) location.href='index.html'">⬅ VOLTAR</button>
+    </div>
+
+    <!-- JOGO -->
+    <div id="telaJogo" style="display:none;">
+      <div class="painelBranco"><div id="ranking"></div></div>
+    </div>
+
+    <!-- CONTAGEM -->
+    <div id="contagem">
+      <h1 id="numContagem">5</h1>
+      <p>Preparem-se!</p>
+    </div>
+
+    <!-- FIM -->
+    <div id="telaFim"></div>
+
+  </div>
+</body>
+</html>

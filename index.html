@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LumenType — Projeto Lumen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js" defer></script>
+  <script src="js/index.js" defer></script>
+</head>
+<body>
+  <div class="lumen-container">
+
+    <div class="logo-lumen">
+      <span class="icon">💡</span>
+      <h1>Lumen<span class="highlight">Type</span></h1>
+    </div>
+    <p class="subtitle">Projeto Lumen • Lar de Maria</p>
+
+    <!-- ENTRADA -->
+    <div class="card" id="painelPrincipal">
+      <input type="text" id="codigoSala" placeholder="CÓDIGO DA SALA" maxlength="6" autocomplete="off" inputmode="numeric">
+      <button class="btn-play" onclick="entrarNaSala()">JOGAR AGORA!</button>
+
+      <div class="divider">ou</div>
+
+      <button class="btn-create" onclick="mostrarConfiguracoes()">+ CRIAR SALA (PROFESSOR)</button>
+
+      <button class="btn-create" onclick="location.href='lobby.html?modo=solo'"
+        style="background:#9b59b6; box-shadow:0 6px 0 #8e44ad; text-shadow:1px 1px 0 #5f2c82; margin-top:15px;">
+        🎮 TREINO SOLO (SEM SALA)
+      </button>
+    </div>
+
+    <!-- CONFIGURAR SALA -->
+    <div class="card" id="painelConfig" style="display:none;">
+      <h2 style="margin-bottom:20px; color:#333;">Configurar Sala</h2>
+
+      <p style="text-align:left; font-weight:900; color:#777; margin-bottom:10px;">DURAÇÃO DA COMPETIÇÃO:</p>
+      <select id="duracao" style="margin-bottom:25px;">
+        <option value="10">10 minutos</option>
+        <option value="15" selected>15 minutos</option>
+        <option value="20">20 minutos</option>
+      </select>
+
+      <button class="btn-play" onclick="gerarSala()">GERAR SALA AGORA</button>
+      <button class="btn-create" onclick="voltarPrincipal()"
+        style="background:#ccc; box-shadow:0 6px 0 #999; text-shadow:none; margin-top:15px;">CANCELAR</button>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lobby - LumenType</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js" defer></script>
+  <script src="js/lobby.js" defer></script>
+  
+  <style>
+    /* Estilos Gamificados para o Carrossel */
+    .carrossel { 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        gap: 20px; 
+        margin: 25px 0; 
+    }
+    .seta { 
+        background: #f0f0f0; 
+        border: none; 
+        color: #007bb5; 
+        width: 55px; 
+        height: 55px; 
+        border-radius: 50%; 
+        font-size: 1.5rem; 
+        font-weight: 900; 
+        cursor: pointer; 
+        transition: 0.2s; 
+        box-shadow: 0 5px 0 #ccc; 
+    }
+    .seta:hover { 
+        background: #e0e0e0; 
+        transform: translateY(3px); 
+        box-shadow: 0 2px 0 #ccc; 
+    }
+    .avatar-preview { 
+        width: 140px; 
+        height: 140px; 
+        border-radius: 50%; 
+        border: 6px solid #4cd137; /* Borda Verde Neon */
+        object-fit: cover; 
+        background: #f7fcff; 
+        padding: 5px; 
+        box-shadow: 0 10px 25px rgba(76, 209, 55, 0.4); 
+        transition: transform 0.3s ease; 
+    }
+  </style>
+</head>
+<body>
+  <div class="lumen-container">
+    <div class="logo-lumen" style="animation: none; margin-bottom: 15px;">
+      <h1 style="font-size: 2.2rem;">Lumen<span class="highlight">Type</span></h1>
+    </div>
+
+    <div class="card">
+        <h2 style="color:#333; margin-bottom: 20px;">Crie seu Perfil</h2>
+        
+        <!-- O Carrossel de Imagens -->
+        <p style="color:#999; font-weight:900; margin-bottom: 10px; font-size: 1.1rem;">Escolha seu Avatar:</p>
+        <div class="carrossel">
+            <button class="seta" onclick="mudarAvatar(-1)">◀</button>
+            <img id="avatarImg" class="avatar-preview" src="img/img1.jpeg" alt="Avatar Selecionado">
+            <button class="seta" onclick="mudarAvatar(1)">▶</button>
+        </div>
+
+        <!-- Entrada do Nome -->
+        <input type="text" id="nickname" placeholder="DIGITE SEU NOME" autocomplete="off" maxlength="12" style="margin-bottom: 25px;">
+        
+        <button class="btn-play" onclick="entrarNaCorrida()">ENTRAR NA SALA</button>
+    </div>
+  </div>
+</body>
+</html>
