@@ -239,11 +239,15 @@
     var top3 = js.slice(0, 3);
     var resto = js.slice(3);
 
+    var idsPodio = top3.map(function (j) { return j.id; });
+    var fora = js.filter(function (j) { return idsPodio.indexOf(j.id) < 0; });
+
     var premios = [
-      medal('🎯 Mais Preciso', js, 'accuracy', function (v) { return Math.round(v) + '%'; }),
-      medal('⚡ Mais Rápido', js, 'wpm', function (v) { return v + ' ppm'; }),
-      medal('🔥 Maior Sequência', js, 'combo_max', function (v) { return 'x' + v; }),
-      esforcado(js)
+      medal('🎯 Mais Preciso', js, function (j) { return j.accuracy || 0; }, function (j) { return Math.round(j.accuracy) + '%'; }),
+      medal('⚡ Mais Rápido', js, function (j) { return j.wpm || 0; }, function (j) { return (j.wpm || 0) + ' ppm'; }),
+      medal('📊 Craque do Excel', fora, function (j) { return (j.mcq_ok || 0) + (j.form_feitas || 0); }, function (j) { return (j.mcq_ok || 0) + '/' + (j.mcq_tot || 0) + ' · ' + (j.form_feitas || 0) + ' fórm.'; }),
+      medal('🧗 Mais Esforçado', fora, function (j) { return j.segmentos || 0; }, function (j) { return (j.segmentos || 0) + ' trechos'; }),
+      { t: '🪑 Melhor Postura', nome: '— o professor escolhe —', v: '' }
     ].filter(Boolean);
 
     tela.innerHTML =
@@ -259,9 +263,11 @@
         return '<div class="pr"><div class="prT">' + p.t + '</div><div class="prN">' + esc(p.nome) + '</div><div class="prV">' + p.v + '</div></div>';
       }).join('') + '</div>' +
       '<div class="fimBtns">' +
+        '<button class="res" onclick="window.open(\'resultado.html?sala_id=' + salaId + '\',\'_blank\')">📋 RESULTADO / IMPRIMIR</button>' +
         '<button onclick="voltarLobby()">🔄 VOLTAR AO LOBBY</button>' +
         '<button class="sec" onclick="encerrarSala()">⏹ ENCERRAR SALA</button>' +
-      '</div>';
+      '</div>' +
+      '<p style="text-align:center;color:#fff;font-weight:800;margin-top:12px;opacity:.9">Abra o Resultado e imprima ANTES de voltar ao lobby ou encerrar — os pontos são apagados.</p>';
 
     festa();
     SFX.vitoria();
@@ -279,16 +285,10 @@
       '</div>';
   }
 
-  function medal(titulo, js, campo, fmt) {
-    var w = js.slice().sort(function (a, b) { return (b[campo] || 0) - (a[campo] || 0); })[0];
-    if (!w || !(w[campo] > 0)) return null;
-    return { t: titulo, nome: w.nickname, v: fmt(w[campo]) };
-  }
-  function esforcado(js) {
-    var baixo = js.slice(Math.ceil(js.length / 2));
-    var w = baixo.slice().sort(function (a, b) { return (b.segmentos || 0) - (a.segmentos || 0); })[0];
-    if (!w || !(w.segmentos > 0)) return null;
-    return { t: '💪 Mais Esforçado', nome: w.nickname, v: w.segmentos + ' trechos' };
+  function medal(titulo, pool, valor, fmt) {
+    var w = pool.slice().sort(function (a, b) { return valor(b) - valor(a); })[0];
+    if (!w || !(valor(w) > 0)) return { t: titulo, nome: '—', v: '' };
+    return { t: titulo, nome: w.nickname, v: fmt(w) };
   }
 
   // =========================================================
