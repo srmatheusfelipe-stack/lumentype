@@ -24,6 +24,9 @@ alter table public.jogadores
   add column if not exists accuracy    numeric(5,2) not null default 100,
   add column if not exists combo_max   integer      not null default 0,
   add column if not exists segmentos   integer      not null default 0,
+  add column if not exists form_feitas integer      not null default 0,
+  add column if not exists mcq_ok      integer      not null default 0,
+  add column if not exists mcq_tot     integer      not null default 0,
   add column if not exists finished_at timestamptz;
 
 -- 3. Realtime
@@ -57,5 +60,6 @@ from information_schema.columns
 where table_schema='public'
   and table_name in ('salas','jogadores')
   and column_name in ('status','duracao_seg','started_at','ends_at',
-                      'score','accuracy','combo_max','segmentos','finished_at')
+                      'score','accuracy','combo_max','segmentos','finished_at',
+                      'form_feitas','mcq_ok','mcq_tot')
 order by table_name, column_name;

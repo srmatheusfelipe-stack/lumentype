@@ -7,8 +7,11 @@
   'use strict';
 
   var ctx = null, master = null;
+  // som LIGADO por padrao; so fica mudo se o usuario desativar de proposito.
+  // (chave nova: reseta quem tinha mutado em testes antigos)
+  var CHAVE = 'lumen_som3';
   var ligado = true;
-  try { ligado = localStorage.getItem('lumen_som') !== '0'; } catch (e) {}
+  try { ligado = localStorage.getItem(CHAVE) !== '0'; } catch (e) {}
 
   function init() {
     if (ctx) return ctx;
@@ -120,7 +123,7 @@
 
     alternar: function () {
       ligado = !ligado;
-      try { localStorage.setItem('lumen_som', ligado ? '1' : '0'); } catch (e) {}
+      try { localStorage.setItem(CHAVE, ligado ? '1' : '0'); } catch (e) {}
       if (ligado) { acordar(); API.tecla(); }
       return ligado;
     },

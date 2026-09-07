@@ -26,6 +26,7 @@
   var seq = CONTENT.LISTA.slice(), ptr = 0, seg = null;
   var alvo = '', spans = [], ultimoLen = 0, idxErro = null, segIni = 0, mcqIni = 0;
   var totScore = 0, totChars = 0, totErrChars = 0, comboAtual = 0, comboMax = 0, nSeg = 0;
+  var formFeitas = 0, mcqOk = 0, mcqTot = 0;   // desempenho de Excel
   var jogoAtivo = false, jaFinalizou = false, ultimoEnvio = 0, contagemRodando = false;
   var mcqTravado = false;
 
@@ -279,7 +280,8 @@
 
     var t = (Date.now() - mcqIni) / 1000;
     var pts = 0;
-    if (certo) { pts = 30 + (t < 3 ? 15 : t < 6 ? 8 : 0); comboAtual++; comboMax = Math.max(comboMax, comboAtual); SFX.acerto(); }
+    mcqTot++;
+    if (certo) { mcqOk++; pts = 30 + (t < 3 ? 15 : t < 6 ? 8 : 0); comboAtual++; comboMax = Math.max(comboMax, comboAtual); SFX.acerto(); }
     else { comboAtual = 0; SFX.erro(); }
     totScore += pts;
     nSeg++;
@@ -359,6 +361,7 @@
     var base = seg.t === 'formula' ? 50 : (alvo.trim().split(/\s+/).length * 10);
     var pts = Math.round((base + Math.min(60, ppmSeg / 2)) * mult) + flawless;
 
+    if (seg.t === 'formula') formFeitas++;
     totScore += pts;
     totChars += len;
     totErrChars += erros;
@@ -411,7 +414,11 @@
     var ppm = Math.round((totChars / 5) / mins);
     var prec = totChars + totErrChars > 0 ? +(totChars / (totChars + totErrChars) * 100).toFixed(2) : 100;
     var prog = Math.min(100, Math.round((Date.now() - comecoEm) / (dur * 1000) * 100));
-    return { score: totScore, wpm: ppm, accuracy: prec, combo_max: comboMax, segmentos: nSeg, progresso: prog };
+    return {
+      score: totScore, wpm: ppm, accuracy: prec, combo_max: comboMax,
+      segmentos: nSeg, progresso: prog,
+      form_feitas: formFeitas, mcq_ok: mcqOk, mcq_tot: mcqTot
+    };
   }
 
   async function enviarBanco(fim) {
@@ -486,6 +493,8 @@
         stat(eu.score || 0, 'PONTOS') + stat(eu.wpm || 0, 'PPM') +
         stat(Math.round(eu.accuracy || 0) + '%', 'PRECISÃO') + stat('x' + comboMax, 'MAIOR COMBO') +
       '</div>' +
+      '<div class="fExcel">📊 Excel: <b>' + (eu.form_feitas || 0) + '</b> fórmulas · <b>' +
+        (eu.mcq_ok || 0) + '/' + (eu.mcq_tot || 0) + '</b> perguntas</div>' +
       '<p class="fTV">👀 Olhe para a TV para ver o pódio completo</p>';
   }
 
