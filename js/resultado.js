@@ -66,8 +66,9 @@
 
     var tabelaHTML = js.map(function (j, i) {
       var nv = nivel(j.wpm || 0, j.accuracy || 0);
+      var med = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + 'º';
       return '<tr>' +
-        '<td>' + (i + 1) + 'º</td>' +
+        '<td>' + med + '</td>' +
         '<td class="nome">' + esc(j.nickname) + '</td>' +
         '<td>' + nv.e + ' ' + nv.n + '</td>' +
         '<td>' + (j.wpm || 0) + '</td>' +
@@ -99,6 +100,13 @@
 
       '<h2>Pódio</h2><div class="podio">' + podioHTML + '</div>' +
 
+      '<h2>Ranking geral</h2>' +
+      '<p class="nota">Para a entrega: chame de baixo para cima e deixe o pódio por último.</p>' +
+      '<table class="turma">' +
+        '<thead><tr><th>#</th><th>Nome</th><th>Nível</th><th>PPM</th><th>Precisão</th><th>Combo</th><th>Trechos</th><th>Fórm.</th><th>Perg.</th><th>Pontos</th></tr></thead>' +
+        '<tbody>' + tabelaHTML + '</tbody>' +
+      '</table>' +
+
       '<h2>Insígnias</h2>' +
       '<table class="premios">' +
         linhaPremio('🎯', 'Mais Preciso(a)', preciso, function (j) { return Math.round(j.accuracy) + '% de precisão'; }) +
@@ -106,13 +114,7 @@
         linhaPremio('📊', 'Craque do Excel', excel, function (j) { return (j.mcq_ok || 0) + '/' + (j.mcq_tot || 0) + ' perguntas · ' + (j.form_feitas || 0) + ' fórmulas'; }) +
         linhaPremio('🧗', 'Mais Esforçado(a)', esforcado, function (j) { return (j.segmentos || 0) + ' trechos completados'; }) +
       '</table>' +
-      '<p class="nota">🎯 e ⚡ podem ser de qualquer aluno. 📊 🧗 são de quem ficou fora do pódio. A de 🪑 Melhor Postura é sua, decidida na aula.</p>' +
-
-      '<h2>Turma completa</h2>' +
-      '<table class="turma">' +
-        '<thead><tr><th>#</th><th>Nome</th><th>Nível</th><th>PPM</th><th>Precisão</th><th>Combo</th><th>Trechos</th><th>Fórm.</th><th>Perg.</th><th>Pontos</th></tr></thead>' +
-        '<tbody>' + tabelaHTML + '</tbody>' +
-      '</table>' +
+      '<p class="nota">🎯 e ⚡ podem ser de qualquer aluno, inclusive do pódio. 📊 e 🧗 só de quem ficou fora do pódio.</p>' +
       medalhas +
       '<p class="rodape">Guarde/imprima esta página antes de reiniciar ou encerrar a sala — os dados são apagados.</p>';
   }

@@ -6,12 +6,12 @@
   <title>Telão — LumenType</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/global.css?v=7">
+  <link rel="stylesheet" href="css/global.css?v=8">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=7" defer></script>
-  <script src="js/sfx.js?v=7" defer></script>
-  <script src="js/tv.js?v=7" defer></script>
+  <script src="js/supabase.js?v=8" defer></script>
+  <script src="js/sfx.js?v=8" defer></script>
+  <script src="js/tv.js?v=8" defer></script>
 
   <style>
     body { align-items: flex-start; height: auto; min-height: 100vh; overflow-y: auto; }
@@ -74,6 +74,13 @@
     #ranking.compacto .row .dir { width: 140px; }
     #ranking.compacto .row .dir .sc { font-size: 1.05rem; }
     #ranking.compacto .row .dir .ppm { font-size: .7rem; }
+
+    .btnEncerrarJa {
+      margin-top: 14px; width: auto; padding: 10px 20px; font-size: .9rem;
+      background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.6);
+      box-shadow: none; opacity: .8;
+    }
+    .btnEncerrarJa:hover { background: rgba(255,255,255,.15); opacity: 1; }
 
     /* pódio final */
     #telaFim { display: none; }
@@ -145,6 +152,7 @@
     <!-- JOGO -->
     <div id="telaJogo" style="display:none;">
       <div class="painelBranco"><div id="ranking"></div></div>
+      <button class="btnEncerrarJa" onclick="encerrarRodada()">⏭ ENCERRAR RODADA AGORA</button>
     </div>
 
     <!-- CONTAGEM -->

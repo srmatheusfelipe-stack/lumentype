@@ -290,6 +290,16 @@
     return { t: titulo, nome: w.nickname, v: fmt(w) };
   }
 
+  // Encerra a rodada antes do tempo (teste, ou imprevisto na aula).
+  // Marcar status='fim' derruba a partida em todos os alunos pelo realtime.
+  window.encerrarRodada = async function () {
+    if (fase !== 'jogo' || jaFechou) return;
+    if (!confirm('Encerrar a rodada AGORA e mostrar o pódio?')) return;
+    jaFechou = true;
+    await db.from('salas').update({ status: 'fim', ends_at: new Date().toISOString() }).eq('id', salaId);
+    setTimeout(mostrarPodio, 1200);
+  };
+
   // =========================================================
   //  BOTÕES DE FIM
   // =========================================================
