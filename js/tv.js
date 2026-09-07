@@ -12,6 +12,18 @@
   var fase = 'lobby'; // lobby | contagem | jogo | fim
   var nodes = {}, prevRank = {}, jaFechou = false;
 
+  // Setinha "voltar": sempre pergunta, porque sair encerra a sala.
+  // Instalado JA, fora do boot(): dentro dele ficava depois de um await (e de
+  // um return em caso de erro), deixando o professor sem trava.
+  NavGuard.instalar(function () {
+    var aviso = (fase === 'jogo' || fase === 'contagem')
+      ? 'A COMPETIÇÃO ESTÁ ROLANDO!\n\nSair vai encerrar a sala, desconectar os alunos e APAGAR os resultados desta partida.\n\nTem certeza?'
+      : fase === 'fim'
+        ? 'Sair vai encerrar a sala e APAGAR os resultados.\n\nJá imprimiu a folha de resultado? Se não, cancele e clique em "Resultado / imprimir" antes.\n\nTem certeza?'
+        : 'Sair vai encerrar a sala. Os alunos que já entraram serão desconectados.\n\nTem certeza?';
+    return { pergunta: aviso, sair: apagarSala };
+  });
+
   // =========================================================
   async function boot() {
     var r = await db.from('salas').select('*').eq('id', salaId).single();
@@ -27,17 +39,6 @@
       .subscribe();
 
     SFX.montarBotao($('controles'));
-
-    // Setinha "voltar": sempre pergunta, porque sair encerra a sala.
-    NavGuard.instalar(function () {
-      var aviso = (fase === 'jogo' || fase === 'contagem')
-        ? 'A COMPETIÇÃO ESTÁ ROLANDO!\n\nSair vai encerrar a sala, desconectar os alunos e APAGAR os resultados desta partida.\n\nTem certeza?'
-        : fase === 'fim'
-          ? 'Sair vai encerrar a sala e APAGAR os resultados.\n\nJá imprimiu a folha de resultado? Se não, cancele e clique em "Resultado / imprimir" antes.\n\nTem certeza?'
-          : 'Sair vai encerrar a sala. Os alunos que já entraram serão desconectados.\n\nTem certeza?';
-      return { pergunta: aviso, sair: apagarSala };
-    });
-
     tick();
     setInterval(tick, 1500);           // fallback do realtime
     setInterval(loopRelogio, 250);     // relógio global
@@ -324,13 +325,18 @@
     location.reload();
   };
 
-  // apaga sala + jogadores e volta pro inicio (sem perguntar; quem chama ja perguntou)
+  // apaga sala + jogadores e volta pro inicio (sem perguntar; quem chama ja perguntou).
+  // Sai da pagina de qualquer jeito em ate 4s: se o banco travar, o professor
+  // nao pode ficar preso numa tela que nao responde.
   async function apagarSala() {
-    try {
+    NavGuard.liberar();
+    var limpeza = (async function () {
       await db.from('jogadores').delete().eq('sala_id', salaId);
       await db.from('salas').delete().eq('id', salaId);
-    } catch (e) {}
-    NavGuard.liberar();
+    })();
+    try {
+      await Promise.race([limpeza, new Promise(function (r) { setTimeout(r, 4000); })]);
+    } catch (e) { console.error('falha ao apagar a sala:', e); }
     location.href = 'index.html';
   }
 

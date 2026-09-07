@@ -8,27 +8,48 @@
 //
 // NavGuard.liberar()  -> desarma antes de uma navegacao que o proprio app faz
 //                        (senao o navegador pergunta duas vezes).
+//
+// Detalhe importante: uma barreira so no historico nao segura. Se a pessoa
+// aperta "voltar" varias vezes rapido, os popstate chegam em rajada e um deles
+// escapa antes da gente repor a barreira. Por isso mantemos VARIAS entradas
+// empilhadas e repomos de forma sincrona, antes de qualquer alert/confirm
+// (que travam a thread).
 
 (function (global) {
   'use strict';
 
-  var decidir = null, armado = false;
+  var FOLGA = 5;               // quantas entradas de barreira manter
+  var decidir = null, armado = false, barreiras = 0;
 
-  function barreira() {
-    try { history.pushState({ ng: 1 }, '', location.href); } catch (e) {}
+  function empilhar(n) {
+    for (var i = 0; i < n; i++) {
+      try { history.pushState({ ng: ++barreiras }, '', location.href); } catch (e) { return; }
+    }
+  }
+
+  function reporBarreiras() {
+    // sincrono e antes de qualquer dialogo
+    empilhar(Math.max(1, FOLGA - 1));
   }
 
   function estado() {
     if (!decidir) return 'livre';
-    var d = decidir();
-    return d || 'livre';
+    return decidir() || 'livre';
   }
 
   function aoVoltar() {
     var d = estado();
-    if (d === 'livre') { history.back(); return; }   // deixa a setinha funcionar
 
-    barreira();                                       // recoloca a trava
+    if (d === 'livre') {
+      // sair de verdade: pula todas as barreiras que empilhamos
+      var pulos = barreiras + 1;
+      barreiras = 0;
+      try { history.go(-pulos); } catch (e) { history.back(); }
+      return;
+    }
+
+    reporBarreiras();
+
     if (d.bloqueado) { alert(d.bloqueado); return; }
     if (d.pergunta && confirm(d.pergunta)) {
       liberar();
@@ -54,7 +75,7 @@
       decidir = fn;
       if (armado) return;
       armado = true;
-      barreira();
+      empilhar(FOLGA);
       global.addEventListener('popstate', aoVoltar);
       global.addEventListener('beforeunload', aoDescarregar);
     },
