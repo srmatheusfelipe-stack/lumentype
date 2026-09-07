@@ -82,10 +82,13 @@
 
     // contagem de medalhas
     var N = js.length;
+    var part = Math.max(0, N - 3);
     var medalhas =
       '<p class="med"><b>Medalhas para esta turma (' + N + ' alunos):</b> ' +
-      '3 pódio + ' + Math.max(0, N - 3) + ' participação + 5 insígnia = <b>' + (Math.max(0, N - 3) + 8) + '</b> no total. ' +
-      '<span class="obs">(pódio não recebe participação; alguns alunos ganham 2 medalhas)</span></p>';
+      '3 pódio + ' + part + ' participação + 4 insígnia = <b>' + (part + 7) + '</b>' +
+      ' &nbsp;·&nbsp; com a de Melhor Postura: <b>' + (part + 8) + '</b>' +
+      '<br><span class="obs">O pódio não recebe participação. Alguns alunos levam 2 medalhas ' +
+      '(participação + insígnia), por isso o total passa do número de alunos.</span></p>';
 
     $('conteudo').innerHTML =
       '<div class="cab">' +
@@ -102,9 +105,8 @@
         linhaPremio('⚡', 'Mais Rápido(a)', rapido, function (j) { return (j.wpm || 0) + ' PPM'; }) +
         linhaPremio('📊', 'Craque do Excel', excel, function (j) { return (j.mcq_ok || 0) + '/' + (j.mcq_tot || 0) + ' perguntas · ' + (j.form_feitas || 0) + ' fórmulas'; }) +
         linhaPremio('🧗', 'Mais Esforçado(a)', esforcado, function (j) { return (j.segmentos || 0) + ' trechos completados'; }) +
-        '<tr><td class="pi">🪑</td><td class="pt">Melhor Postura</td><td class="pn">________________________</td><td class="pv">(você escolhe durante a aula)</td></tr>' +
       '</table>' +
-      '<p class="nota">🎯 e ⚡ podem ser de qualquer aluno. 📊 🧗 são de quem ficou fora do pódio.</p>' +
+      '<p class="nota">🎯 e ⚡ podem ser de qualquer aluno. 📊 🧗 são de quem ficou fora do pódio. A de 🪑 Melhor Postura é sua, decidida na aula.</p>' +
 
       '<h2>Turma completa</h2>' +
       '<table class="turma">' +

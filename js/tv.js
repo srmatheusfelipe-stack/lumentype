@@ -246,8 +246,7 @@
       medal('🎯 Mais Preciso', js, function (j) { return j.accuracy || 0; }, function (j) { return Math.round(j.accuracy) + '%'; }),
       medal('⚡ Mais Rápido', js, function (j) { return j.wpm || 0; }, function (j) { return (j.wpm || 0) + ' ppm'; }),
       medal('📊 Craque do Excel', fora, function (j) { return (j.mcq_ok || 0) + (j.form_feitas || 0); }, function (j) { return (j.mcq_ok || 0) + '/' + (j.mcq_tot || 0) + ' · ' + (j.form_feitas || 0) + ' fórm.'; }),
-      medal('🧗 Mais Esforçado', fora, function (j) { return j.segmentos || 0; }, function (j) { return (j.segmentos || 0) + ' trechos'; }),
-      { t: '🪑 Melhor Postura', nome: '— o professor escolhe —', v: '' }
+      medal('🧗 Mais Esforçado', fora, function (j) { return j.segmentos || 0; }, function (j) { return (j.segmentos || 0) + ' trechos'; })
     ].filter(Boolean);
 
     tela.innerHTML =
