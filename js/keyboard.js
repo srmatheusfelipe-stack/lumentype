@@ -52,7 +52,7 @@
   var TECLA_DEDO = {};
   LINHAS.forEach(function (l) { l.forEach(function (k) { TECLA_DEDO[k[0]] = k[2]; }); });
 
-  var U = 62, GAP = 6, STEP = U + GAP, PADX = 14, PADY = 14;
+  var U = 76, GAP = 7, STEP = U + GAP, PADX = 16, PADY = 16;
   var LARG = 15 * STEP - GAP + PADX * 2;
   var ALT = 5 * STEP - GAP + PADY * 2;
 
@@ -70,26 +70,26 @@
     var s = document.createElement('style');
     s.id = 'kb-css';
     s.textContent = [
-      '.kb-wrap{width:100%;max-width:860px;margin:0 auto}',
+      '.kb-wrap{width:100%;max-width:1040px;margin:0 auto}',
       '.kb-wrap svg{width:100%;height:auto;display:block;overflow:visible}',
-      '.kb-key rect.cap{fill:#fff;stroke:#e2e8f0;stroke-width:1.5;transition:stroke .12s}',
-      '.kb-key text{font-family:Nunito,system-ui,sans-serif;font-weight:800;fill:#94a3b8;pointer-events:none;transition:fill .12s}',
-      '.kb-key text.sub{fill:#cbd5e1;font-weight:700}',
-      '.kb-key rect.strip{opacity:.6}',
+      '.kb-key rect.cap{fill:#fff;stroke:#dbe3ea;stroke-width:2;transition:stroke .12s}',
+      '.kb-key text{font-family:Nunito,system-ui,sans-serif;font-weight:900;fill:#5b6b7c;pointer-events:none;transition:fill .12s}',
+      '.kb-key text.sub{fill:#aab7c4;font-weight:800}',
+      '.kb-key rect.strip{opacity:.75}',
       '.kb-key{transition:transform .1s}',
       '.kb-key.cue{transform:translateY(-1px)}',
       '.kb-key.cue rect.cap{stroke-width:2.5}',
       '.kb-key.cue text{fill:#fff}',
       '.kb-key.cue text.sub{fill:rgba(255,255,255,.75)}',
       '.kb-key.cue rect.strip{opacity:0}',
-      '.kb-key.step2 rect.cap{opacity:.55}',
-      '.kb-key text.kb-badge{fill:#0f172a;font-size:13px;font-weight:900}',
-      '.kb-key .kb-badge-bg{fill:#fff;stroke:#0f172a;stroke-width:1.5}',
+      '.kb-key.step2 rect.cap{opacity:.82}',
+      '.kb-key text.kb-badge{fill:#0f172a;font-size:15px;font-weight:900}',
+      '.kb-key .kb-badge-bg{fill:#fff;stroke:#0f172a;stroke-width:2}',
       '@keyframes kbpulse{0%,100%{stroke-opacity:1}50%{stroke-opacity:.2}}',
-      '.kb-key.cue rect.ring{stroke:#0f172a;stroke-width:2.5;fill:none;animation:kbpulse 1s ease-in-out infinite}',
-      '.kb-legenda{display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center;margin-top:10px}',
-      '.kb-legenda span{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:800;color:#64748b}',
-      '.kb-legenda i{width:11px;height:11px;border-radius:3px;display:block}'
+      '.kb-key.cue rect.ring{stroke:#0f172a;stroke-width:3;fill:none;animation:kbpulse 1s ease-in-out infinite}',
+      '.kb-legenda{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;margin-top:14px}',
+      '.kb-legenda span{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:800;color:#5b6b7c}',
+      '.kb-legenda i{width:13px;height:13px;border-radius:4px;display:block}'
     ].join('');
     document.head.appendChild(s);
   }
@@ -112,29 +112,36 @@
 
         g.appendChild(el('rect', { class: 'cap', x: x, y: y, width: kw, height: kh, rx: 8 }));
 
-        if (DEDOS[dedo] && dedo !== 'pl') {
+        if (DEDOS[dedo]) {
           g.appendChild(el('rect', {
-            class: 'strip', x: x + 6, y: y + kh - 6, width: kw - 12, height: 4, rx: 2,
+            class: 'strip', x: x + 8, y: y + kh - 8, width: kw - 16, height: 5, rx: 2.5,
             fill: DEDOS[dedo].c
           }));
         }
 
-        var ring = el('rect', { class: 'ring', x: x + 1.5, y: y + 1.5, width: kw - 3, height: kh - 3, rx: 7 });
+        var ring = el('rect', { class: 'ring', x: x + 2, y: y + 2, width: kw - 4, height: kh - 4, rx: 8 });
         ring.style.display = 'none';
         g.appendChild(ring);
 
-        var big = el('text', { x: x + 9, y: y + 20, 'font-size': 14 });
+        // legenda principal: grande e centralizada (Ctrl/Alt/AltGr ficam menores)
+        var longa = rot.length > 2;
+        var diacritico = '´`~^¨'.indexOf(rot) >= 0;   // acentos: glifo minusculo, precisa de corpo maior
+        var fs = longa ? 15 : diacritico ? 40 : 26;
+        var cy = sub ? (y + kh * 0.66) : (y + kh / 2 + fs * 0.35);
+        if (diacritico) cy = y + kh * 0.78;
+        var big = el('text', { x: x + kw / 2, y: cy, 'font-size': fs, 'text-anchor': 'middle' });
         big.textContent = rot;
         g.appendChild(big);
 
+        // segundo caractere (Shift) no canto de cima
         if (sub) {
-          var st = el('text', { class: 'sub', x: x + 9, y: y + kh - 9, 'font-size': 11 });
+          var st = el('text', { class: 'sub', x: x + kw / 2, y: y + 22, 'font-size': 15, 'text-anchor': 'middle' });
           st.textContent = sub;
           g.appendChild(st);
         }
 
-        var bg = el('circle', { class: 'kb-badge-bg', cx: x + kw - 11, cy: y + 11, r: 9 });
-        var bt = el('text', { class: 'kb-badge', x: x + kw - 11, y: y + 15, 'text-anchor': 'middle' });
+        var bg = el('circle', { class: 'kb-badge-bg', cx: x + kw - 12, cy: y + 12, r: 11 });
+        var bt = el('text', { class: 'kb-badge', x: x + kw - 12, y: y + 17, 'text-anchor': 'middle' });
         bg.style.display = 'none'; bt.style.display = 'none';
         g.appendChild(bg); g.appendChild(bt);
 
@@ -150,7 +157,7 @@
     if (opts.legenda) {
       legendaEl = document.createElement('div');
       legendaEl.className = 'kb-legenda';
-      ['lm', 'la', 'lc', 'li', 'ri', 'rc', 'ra', 'rm'].forEach(function (d) {
+      ['lm', 'la', 'lc', 'li', 'ri', 'rc', 'ra', 'rm', 'pl'].forEach(function (d) {
         var s = document.createElement('span');
         s.innerHTML = '<i style="background:' + DEDOS[d].c + '"></i>' + DEDOS[d].n;
         legendaEl.appendChild(s);

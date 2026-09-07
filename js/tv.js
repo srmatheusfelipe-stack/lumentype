@@ -26,6 +26,7 @@
       .on('postgres_changes', { event: '*', schema: 'public', table: 'jogadores', filter: 'sala_id=eq.' + salaId }, tick)
       .subscribe();
 
+    SFX.montarBotao($('controles'));
     tick();
     setInterval(tick, 1500);           // fallback do realtime
     setInterval(loopRelogio, 250);     // relógio global
@@ -116,11 +117,16 @@
     fase = 'contagem';
     $('contagem').style.display = 'flex';
 
+    var ultimoBip = -1;
     var tick2 = function () {
       var falta = Math.ceil((comecoEm - Date.now()) / 1000);
-      if (falta > 0) { $('numContagem').textContent = falta; setTimeout(tick2, 200); }
-      else {
+      if (falta > 0) {
+        $('numContagem').textContent = falta;
+        if (falta !== ultimoBip && falta <= 5) { ultimoBip = falta; SFX.tick(); }
+        setTimeout(tick2, 200);
+      } else {
         $('numContagem').textContent = 'JÁ!';
+        SFX.ja();
         setTimeout(function () {
           $('contagem').style.display = 'none';
           fase = 'jogo';
@@ -134,6 +140,7 @@
   // =========================================================
   //  RELÓGIO GLOBAL
   // =========================================================
+  var ultimoSegBip = -1;
   function loopRelogio() {
     if (fase !== 'jogo' && fase !== 'contagem') return;
     var falta = fimEm - Date.now();
@@ -143,6 +150,7 @@
       el.textContent = Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
       el.classList.toggle('urgente', s <= 30);
     }
+    if (fase === 'jogo' && s <= 10 && s > 0 && s !== ultimoSegBip) { ultimoSegBip = s; SFX.urgente(); }
     if (fase === 'jogo' && falta <= 0 && !jaFechou) {
       jaFechou = true;
       db.from('salas').update({ status: 'fim' }).eq('id', salaId);
@@ -185,6 +193,7 @@
 
   function renderRanking(js) {
     var cont = $('ranking');
+    cont.classList.toggle('compacto', js.length > 16);
     var first = {};
     Object.keys(nodes).forEach(function (id) { first[id] = nodes[id].getBoundingClientRect().top; });
 
@@ -255,6 +264,7 @@
       '</div>';
 
     festa();
+    SFX.vitoria();
   }
 
   function bloco(j, lugar) {

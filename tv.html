@@ -10,6 +10,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js" defer></script>
+  <script src="js/sfx.js" defer></script>
   <script src="js/tv.js" defer></script>
 
   <style>
@@ -20,6 +21,7 @@
     .topo .sala { font-size: 2.4rem; font-weight: 900; text-shadow: 3px 3px 0 #007bb5; }
     .topo .sala small { display: block; font-size: .9rem; letter-spacing: 2px; opacity: .9; }
     .topo .info { text-align: right; font-weight: 900; }
+    .infoBaixo { display: inline-flex; align-items: center; gap: 10px; margin-top: 6px; }
     #timer { font-size: 2rem; }
 
     .painelBranco { background: #fff; border-radius: 24px; padding: 22px; box-shadow: 0 18px 45px rgba(0,0,0,.2); min-height: 320px; }
@@ -62,6 +64,16 @@
     .row .dir .ppm { font-size: .85rem; font-weight: 900; color: #9aa7b2; }
     .row .delta { width: 26px; text-align: center; font-size: 1.1rem; font-weight: 900; }
     .row .delta.sobe { color: #4cd137; } .row .delta.desce { color: #e74c3c; }
+
+    /* turma grande: aperta as linhas pra caber tudo no projetor */
+    #ranking.compacto .row { padding: 5px 12px; margin-bottom: 6px; gap: 10px; border-width: 2px; }
+    #ranking.compacto .row .pos { font-size: 1.2rem; width: 42px; }
+    #ranking.compacto .row .av { width: 34px; height: 34px; }
+    #ranking.compacto .row .nome { font-size: .95rem; }
+    #ranking.compacto .row .barra { height: 8px; margin-top: 3px; }
+    #ranking.compacto .row .dir { width: 140px; }
+    #ranking.compacto .row .dir .sc { font-size: 1.05rem; }
+    #ranking.compacto .row .dir .ppm { font-size: .7rem; }
 
     /* pódio final */
     #telaFim { display: none; }
@@ -114,7 +126,10 @@
       <div class="info">
         ALUNOS: <span id="contador">0</span><br>
         <span style="opacity:.85">Duração: <span id="duracaoLabel">–</span></span><br>
-        <span id="timer" class="timerPill" style="display:none;">0:00</span>
+        <span class="infoBaixo">
+          <span id="controles"></span>
+          <span id="timer" class="timerPill" style="display:none;">0:00</span>
+        </span>
       </div>
     </div>
 

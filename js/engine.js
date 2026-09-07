@@ -30,6 +30,7 @@
   var mcqTravado = false;
 
   KB.mount(elTeclado, { legenda: true });
+  SFX.montarBotao($('controles'));
 
   // =========================================================
   //  BOOT
@@ -121,25 +122,28 @@
 
     if (ehSolo) {
       var n = 3;
-      elNum.textContent = n;
+      elNum.textContent = n; SFX.tick();
       var iv = setInterval(function () {
         n--;
-        if (n > 0) { elNum.textContent = n; }
+        if (n > 0) { elNum.textContent = n; SFX.tick(); }
         else {
-          clearInterval(iv); elNum.textContent = 'JÁ!';
+          clearInterval(iv); elNum.textContent = 'JÁ!'; SFX.ja();
           setTimeout(function () { elContagem.style.display = 'none'; contagemRodando = false; comecarJogo(); }, 450);
         }
       }, 700);
       return;
     }
 
+    var ultimoBip = -1;
     var tick = function () {
       var falta = Math.ceil((comecoEm - Date.now()) / 1000);
       if (falta > 0) {
         elNum.textContent = falta;
+        if (falta !== ultimoBip && falta <= 5) { ultimoBip = falta; SFX.tick(); }
         setTimeout(tick, 200);
       } else {
         elNum.textContent = 'JÁ!';
+        SFX.ja();
         setTimeout(function () {
           elContagem.style.display = 'none';
           contagemRodando = false;
@@ -171,12 +175,14 @@
     setTimeout(loopRelogio, 250);
   }
 
+  var ultimoSegBip = -1;
   function mostrarTimer(ms) {
     var s = Math.max(0, Math.ceil(ms / 1000));
     var m = Math.floor(s / 60);
     var r = s % 60;
     elTimer.textContent = m + ':' + (r < 10 ? '0' : '') + r;
     elTimer.classList.toggle('urgente', s <= 20);
+    if (s <= 10 && s > 0 && s !== ultimoSegBip) { ultimoSegBip = s; SFX.urgente(); }
   }
 
   function proximoSegmento() {
@@ -252,8 +258,8 @@
 
     var t = (Date.now() - mcqIni) / 1000;
     var pts = 0;
-    if (certo) { pts = 30 + (t < 3 ? 15 : t < 6 ? 8 : 0); comboAtual++; comboMax = Math.max(comboMax, comboAtual); }
-    else { comboAtual = 0; }
+    if (certo) { pts = 30 + (t < 3 ? 15 : t < 6 ? 8 : 0); comboAtual++; comboMax = Math.max(comboMax, comboAtual); SFX.acerto(); }
+    else { comboAtual = 0; SFX.erro(); }
     totScore += pts;
     nSeg++;
     atualizarPainel();
@@ -294,8 +300,8 @@
 
     for (var j = ultimoLen; j < cur; j++) {
       var ok = v[j] === alvo[j];
-      if (ok) { comboAtual++; comboMax = Math.max(comboMax, comboAtual); }
-      else { idxErro.add(j); comboAtual = 0; }
+      if (ok) { comboAtual++; comboMax = Math.max(comboMax, comboAtual); SFX.tecla(); }
+      else { idxErro.add(j); comboAtual = 0; SFX.erro(); }
     }
     for (var k = 0; k < cur; k++) {
       if (spans[k]) spans[k].className = (v[k] === alvo[k]) ? 'ok' : 'x';
@@ -338,20 +344,25 @@
     nSeg++;
     atualizarPainel();
     flutuarPontos(pts, erros === 0);
+    SFX.acerto();
 
     if (!ehSolo && Date.now() - ultimoEnvio > 800) enviarBanco(false);
     proximoSegmento();
   }
 
+  var ultimoMult = 1;
   function atualizarPainel() {
     var mins = Math.max(0.02, (Date.now() - comecoEm) / 60000);
     var ppm = Math.round((totChars / 5) / mins);
     var prec = totChars + totErrChars > 0 ? Math.round(totChars / (totChars + totErrChars) * 100) : 100;
+    var mult = comboMult();
     elScore.textContent = totScore;
     elPPM.textContent = ppm;
     elPrec.textContent = prec + '%';
-    elCombo.textContent = 'x' + comboMult();
+    elCombo.textContent = 'x' + mult;
     elCombo.classList.toggle('quente', comboAtual >= 12);
+    if (mult > ultimoMult) SFX.combo();
+    ultimoMult = mult;
   }
 
   function comboMult() {
@@ -437,11 +448,11 @@
     var premio = premioDe(lista, jogadorId);
 
     var tipo, tit, sub, emoji;
-    if (pos === 1) { tipo = 'ouro'; emoji = '🏆'; tit = 'CAMPEÃO(Ã)!'; sub = 'Primeiro lugar da sala. Digitação de outro nível!'; festa(); }
-    else if (pos === 2) { tipo = 'prata'; emoji = '🥈'; tit = 'VICE-CAMPEÃO(Ã)!'; sub = 'Chegou pertinho do topo. Mandou muito bem!'; }
-    else if (pos === 3) { tipo = 'bronze'; emoji = '🥉'; tit = 'TERCEIRO LUGAR!'; sub = 'Pódio garantido. Excelente desempenho!'; }
-    else if (pos <= Math.ceil(n / 2)) { tipo = 'azul'; emoji = '💪'; tit = 'MANDOU MUITO BEM!'; sub = 'Ficou na metade de cima da sala. Consistência boa!'; }
-    else { tipo = 'verde'; emoji = '🌱'; tit = 'BOM TREINO!'; sub = 'Cada tecla conta. Você está mais rápido do que ontem!'; }
+    if (pos === 1) { tipo = 'ouro'; emoji = '🏆'; tit = 'CAMPEÃO(Ã)!'; sub = 'Primeiro lugar da sala. Digitação de outro nível!'; festa(); SFX.vitoria(); }
+    else if (pos === 2) { tipo = 'prata'; emoji = '🥈'; tit = 'VICE-CAMPEÃO(Ã)!'; sub = 'Chegou pertinho do topo. Mandou muito bem!'; SFX.vitoria(); }
+    else if (pos === 3) { tipo = 'bronze'; emoji = '🥉'; tit = 'TERCEIRO LUGAR!'; sub = 'Pódio garantido. Excelente desempenho!'; SFX.vitoria(); }
+    else if (pos <= Math.ceil(n / 2)) { tipo = 'azul'; emoji = '💪'; tit = 'MANDOU MUITO BEM!'; sub = 'Ficou na metade de cima da sala. Consistência boa!'; SFX.bom(); }
+    else { tipo = 'verde'; emoji = '🌱'; tit = 'BOM TREINO!'; sub = 'Cada tecla conta. Você está mais rápido do que ontem!'; SFX.neutro(); }
 
     elFinal.className = 'telaFinal ' + tipo;
     elFinal.innerHTML =
@@ -459,6 +470,7 @@
 
   function montarFinalSolo() {
     var m = metricas();
+    SFX.bom();
     elFinal.style.display = 'flex';
     elFinal.className = 'telaFinal azul';
     elFinal.innerHTML =
