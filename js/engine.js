@@ -29,8 +29,27 @@
   var jogoAtivo = false, jaFinalizou = false, ultimoEnvio = 0, contagemRodando = false;
   var mcqTravado = false;
 
+  // Voltar/avancar do navegador restaura a pagina congelada (bfcache) e o jogo
+  // reaparece num estado velho. Forca recarga limpa.
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) location.reload();
+  });
+
   KB.mount(elTeclado, { legenda: true });
   SFX.montarBotao($('controles'));
+
+  // no treino solo, uma saida visivel (na competicao NAO existe, pra ninguem sair sem querer)
+  if (ehSolo) {
+    var sair = document.createElement('button');
+    sair.type = 'button';
+    sair.className = 'btnSom';
+    sair.textContent = '✕';
+    sair.title = 'Sair do treino';
+    sair.onclick = function () {
+      if (confirm('Sair do treino solo?')) location.href = 'index.html';
+    };
+    $('controles').appendChild(sair);
+  }
 
   // =========================================================
   //  BOOT
@@ -159,6 +178,8 @@
   // =========================================================
   function comecarJogo() {
     if (jogoAtivo || jaFinalizou) return;
+    // no solo o relogio so vale a partir do "JA!" (senao a contagem come tempo e suja o PPM)
+    if (ehSolo) { comecoEm = Date.now(); fimEm = comecoEm + dur * 1000; }
     jogoAtivo = true;
     elJogo.style.display = 'flex';
     proximoSegmento();
