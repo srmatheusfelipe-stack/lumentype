@@ -27,6 +27,17 @@
       .subscribe();
 
     SFX.montarBotao($('controles'));
+
+    // Setinha "voltar": sempre pergunta, porque sair encerra a sala.
+    NavGuard.instalar(function () {
+      var aviso = (fase === 'jogo' || fase === 'contagem')
+        ? 'A COMPETIÇÃO ESTÁ ROLANDO!\n\nSair vai encerrar a sala, desconectar os alunos e APAGAR os resultados desta partida.\n\nTem certeza?'
+        : fase === 'fim'
+          ? 'Sair vai encerrar a sala e APAGAR os resultados.\n\nJá imprimiu a folha de resultado? Se não, cancele e clique em "Resultado / imprimir" antes.\n\nTem certeza?'
+          : 'Sair vai encerrar a sala. Os alunos que já entraram serão desconectados.\n\nTem certeza?';
+      return { pergunta: aviso, sair: apagarSala };
+    });
+
     tick();
     setInterval(tick, 1500);           // fallback do realtime
     setInterval(loopRelogio, 250);     // relógio global
@@ -305,17 +316,33 @@
   // =========================================================
   window.voltarLobby = async function () {
     await db.from('jogadores').update({
-      score: 0, wpm: 0, accuracy: 100, combo_max: 0, segmentos: 0, progresso: 0, finished_at: null
+      score: 0, wpm: 0, accuracy: 100, combo_max: 0, segmentos: 0, progresso: 0,
+      form_feitas: 0, mcq_ok: 0, mcq_tot: 0, finished_at: null
     }).eq('sala_id', salaId);
     await db.from('salas').update({ status: 'lobby', started_at: null, ends_at: null }).eq('id', salaId);
+    NavGuard.liberar();
     location.reload();
   };
 
-  window.encerrarSala = async function () {
-    if (!confirm('Encerrar a sala e apagar os dados desta partida?')) return;
-    await db.from('jogadores').delete().eq('sala_id', salaId);
-    await db.from('salas').delete().eq('id', salaId);
+  // apaga sala + jogadores e volta pro inicio (sem perguntar; quem chama ja perguntou)
+  async function apagarSala() {
+    try {
+      await db.from('jogadores').delete().eq('sala_id', salaId);
+      await db.from('salas').delete().eq('id', salaId);
+    } catch (e) {}
+    NavGuard.liberar();
     location.href = 'index.html';
+  }
+
+  window.encerrarSala = async function () {
+    if (!confirm('Encerrar a sala e apagar os dados desta partida?\n\nImprima a folha de resultado antes, se ainda não imprimiu.')) return;
+    await apagarSala();
+  };
+
+  // botao "voltar" do lobby
+  window.sairDaSala = async function () {
+    if (!confirm('Sair vai encerrar a sala. Os alunos que já entraram serão desconectados.\n\nTem certeza?')) return;
+    await apagarSala();
   };
 
   // =========================================================

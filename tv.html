@@ -11,6 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js?v=8" defer></script>
   <script src="js/sfx.js?v=8" defer></script>
+  <script src="js/navguard.js?v=8" defer></script>
   <script src="js/tv.js?v=8" defer></script>
 
   <style>
@@ -146,7 +147,7 @@
       <div class="painelBranco"><div id="lobby"></div></div>
       <button id="btnIniciar" onclick="iniciarCompeticao()" disabled>AGUARDANDO ALUNOS...</button>
       <button class="btn-create" style="margin-top:12px; background:transparent; box-shadow:none; border:2px solid #fff;"
-        onclick="if(confirm('Sair sem começar?')) location.href='index.html'">⬅ VOLTAR</button>
+        onclick="sairDaSala()">⬅ ENCERRAR SALA E SAIR</button>
     </div>
 
     <!-- JOGO -->

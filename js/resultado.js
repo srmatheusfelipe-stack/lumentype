@@ -81,15 +81,7 @@
         '</tr>';
     }).join('');
 
-    // contagem de medalhas
     var N = js.length;
-    var part = Math.max(0, N - 3);
-    var medalhas =
-      '<p class="med"><b>Medalhas para esta turma (' + N + ' alunos):</b> ' +
-      '3 pódio + ' + part + ' participação + 4 insígnia = <b>' + (part + 7) + '</b>' +
-      ' &nbsp;·&nbsp; com a de Melhor Postura: <b>' + (part + 8) + '</b>' +
-      '<br><span class="obs">O pódio não recebe participação. Alguns alunos levam 2 medalhas ' +
-      '(participação + insígnia), por isso o total passa do número de alunos.</span></p>';
 
     $('conteudo').innerHTML =
       '<div class="cab">' +
@@ -114,8 +106,6 @@
         linhaPremio('📊', 'Craque do Excel', excel, function (j) { return (j.mcq_ok || 0) + '/' + (j.mcq_tot || 0) + ' perguntas · ' + (j.form_feitas || 0) + ' fórmulas'; }) +
         linhaPremio('🧗', 'Mais Esforçado(a)', esforcado, function (j) { return (j.segmentos || 0) + ' trechos completados'; }) +
       '</table>' +
-      '<p class="nota">🎯 e ⚡ podem ser de qualquer aluno, inclusive do pódio. 📊 e 🧗 só de quem ficou fora do pódio.</p>' +
-      medalhas +
       '<p class="rodape">Guarde/imprima esta página antes de reiniciar ou encerrar a sala — os dados são apagados.</p>';
   }
 

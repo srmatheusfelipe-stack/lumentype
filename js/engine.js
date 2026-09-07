@@ -33,11 +33,27 @@
   // Voltar/avancar do navegador restaura a pagina congelada (bfcache) e o jogo
   // reaparece num estado velho. Forca recarga limpa.
   window.addEventListener('pageshow', function (e) {
-    if (e.persisted) location.reload();
+    if (e.persisted) { NavGuard.liberar(); location.reload(); }
   });
 
   KB.mount(elTeclado, { legenda: true });
   SFX.montarBotao($('controles'));
+
+  // Setinha "voltar": no lobby pergunta, durante a avaliacao bloqueia.
+  // O treino solo fica livre (ja tem o botao de sair).
+  NavGuard.instalar(function () {
+    if (ehSolo || jaFinalizou) return 'livre';
+    if (jogoAtivo || contagemRodando) {
+      return { bloqueado: '✋ A avaliação está rolando! Você não pode sair agora.\n\nTermine a rodada — o professor encerra quando o tempo acabar.' };
+    }
+    return {
+      pergunta: 'Sair da sala?\n\nVocê perde o seu lugar e vai precisar entrar de novo com o código.',
+      sair: async function () {
+        if (jogadorId) { try { await db.from('jogadores').delete().eq('id', jogadorId); } catch (e) {} }
+        location.href = 'index.html';
+      }
+    };
+  });
 
   // no treino solo, uma saida visivel (na competicao NAO existe, pra ninguem sair sem querer)
   if (ehSolo) {
@@ -76,6 +92,8 @@
         aplicarEstadoSala(pl.new);
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'salas', filter: 'id=eq.' + salaId }, function () {
+        NavGuard.liberar();
+        alert('O professor encerrou a sala.');
         location.href = 'index.html';
       })
       .subscribe();
@@ -106,6 +124,7 @@
     } else if (s.status === 'fim' && !jaFinalizou) {
       finalizar();
     } else if (s.status === 'lobby' && (jogoAtivo || jaFinalizou || contagemRodando)) {
+      NavGuard.liberar();
       location.reload(); // professor voltou ao lobby
     }
   }
